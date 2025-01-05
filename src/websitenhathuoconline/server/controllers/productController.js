@@ -5,11 +5,11 @@ const upload = multer({ storage });
 
 const getProducts = async (req, res) => {
   try {
-      const [products] = await db.query("SELECT * FROM products");
-      res.status(200).json(products);
+    const [products] = await db.query("SELECT * FROM products");
+    res.status(200).json(products);
   } catch (error) {
-      console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-      res.status(500).json({ message: "Lỗi máy chủ!" });
+    console.error("Lỗi khi lấy danh sách sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi máy chủ!" });
   }
 };
 
@@ -17,26 +17,28 @@ const getProducts = async (req, res) => {
 const addProduct = async (req, res) => {
   const { name, unit, category_id, manufacturer, ingredients, description, price, quantity } = req.body;
 
+  // Kiểm tra dữ liệu từ client
   if (!name || !price || !quantity || !req.files || req.files.length === 0) {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin và chọn ít nhất một hình ảnh!" });
   }
 
   try {
-    // Lấy URL của tất cả các ảnh đã tải lên Cloudinary
+    // Lấy URL của các ảnh tải lên Cloudinary
     const imageUrls = req.files.map((file) => file.path);
 
-    // Thêm sản phẩm vào bảng products
+    // Thêm sản phẩm vào cơ sở dữ liệu
     const [result] = await db.query(
       "INSERT INTO products (name, unit, category_id, manufacturer, ingredients, description, price, quantity, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [name, unit, category_id, manufacturer, ingredients, description, price, quantity, JSON.stringify(imageUrls)]
+      [name, unit, category_id || null, manufacturer, ingredients, description, price, quantity, JSON.stringify(imageUrls)]
     );
 
     res.status(201).json({ message: "Sản phẩm đã được thêm thành công!", productId: result.insertId });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Lỗi máy chủ!" });
+    console.error("Lỗi khi thêm sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi máy chủ khi thêm sản phẩm!" });
   }
 };
+
 
 const getCategories = async (req, res) => {
   try {
@@ -110,19 +112,19 @@ const getProductById = async (req, res) => {
   const { id } = req.params;
 
   try {
-      const [product] = await db.query(
-          "SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?",
-          [id]
-      );
+    const [product] = await db.query(
+      "SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?",
+      [id]
+    );
 
-      if (product.length === 0) {
-          return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
-      }
+    if (product.length === 0) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+    }
 
-      res.status(200).json(product[0]);
+    res.status(200).json(product[0]);
   } catch (error) {
-      console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
-      res.status(500).json({ message: "Lỗi máy chủ!" });
+    console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi máy chủ!" });
   }
 };
 

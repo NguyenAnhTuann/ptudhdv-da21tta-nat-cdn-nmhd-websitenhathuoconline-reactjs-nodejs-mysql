@@ -45,7 +45,7 @@ const Login = () => {
         <div className="bg-blue-50 min-h-screen flex items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
                 <div className="flex justify-center mb-6">
-                    <img src="/images/logo.png" alt="Nhà Thuốc" className="h-16" />
+                    <img src="https://res.cloudinary.com/duk8odqun/image/upload/v1736060282/image-Photoroom_2_tfsjvz.png" alt="Nhà Thuốc" className="h-[200px]" />
                 </div>
                 <h1 className="text-2xl font-bold text-center text-blue-600 mb-4">
                     Đăng nhập vào Nhà Thuốc Online
@@ -95,13 +95,6 @@ const Login = () => {
                     <a href="/register" className="text-blue-500 text-sm hover:underline">
                         Đăng ký tài khoản mới
                     </a>
-                </div>
-                <div className="mt-8 flex justify-center">
-                    <img
-                        src="/images/medicine-banner.png"
-                        alt="Hình minh họa thuốc"
-                        className="w-40"
-                    />
                 </div>
             </div>
         </div>

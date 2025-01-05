@@ -16,7 +16,10 @@ const AdminProducts = () => {
   const [message, setMessage] = useState("");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [editingProductId, setEditingProductId] = useState(null); // Biến để lưu ID sản phẩm đang chỉnh sửa
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [loading, setLoading] = useState(false); // Hiệu ứng loading
+  const [notification, setNotification] = useState({ show: false, type: "", message: "" });
+
 
 
   // Lấy danh sách sản phẩm
@@ -72,6 +75,7 @@ const AdminProducts = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Hiển thị hiệu ứng loading
 
     const data = new FormData();
     data.append("name", formData.name);
@@ -83,28 +87,32 @@ const AdminProducts = () => {
     data.append("price", formData.price);
     data.append("quantity", formData.quantity);
 
-    // Thêm ảnh mới nếu có
     Array.from(images).forEach((image) => {
       data.append("images", image);
     });
 
     try {
       if (editingProductId) {
-        // Nếu đang chỉnh sửa, gọi API cập nhật
         await axios.put(`http://localhost:5000/api/products/update/${editingProductId}`, data);
-        setMessage("Sản phẩm đã được cập nhật!");
+        setNotification({ show: true, type: "success", message: "Sản phẩm đã được cập nhật!" });
       } else {
-        // Nếu không, thêm sản phẩm mới
         await axios.post("http://localhost:5000/api/products/add", data);
-        setMessage("Sản phẩm đã được thêm!");
+        setNotification({ show: true, type: "success", message: "Sản phẩm đã được thêm!" });
       }
 
-      fetchProducts(); // Cập nhật danh sách sản phẩm
-      resetForm(); // Đặt lại form
+      fetchProducts();
+      resetForm();
     } catch (error) {
-      setMessage(error.response?.data?.message || "Đã xảy ra lỗi!");
+      setNotification({
+        show: true,
+        type: "error",
+        message: error.response?.data?.message || "Đã xảy ra lỗi!",
+      });
+    } finally {
+      setLoading(false); // Tắt hiệu ứng loading
     }
   };
+
 
   // Đặt lại form
   const resetForm = () => {
@@ -156,6 +164,51 @@ const AdminProducts = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+          <style>
+            {`
+        .loader {
+          border-top-color: #3498db;
+          animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}
+          </style>
+        </div>
+      )}
+      {notification.show && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4">
+            {notification.type === "success" ? (
+              <div className="text-green-500 text-3xl">✔</div>
+            ) : (
+              <div className="text-red-500 text-3xl">✖</div>
+            )}
+            <div>
+              <p className="text-lg font-bold">
+                {notification.type === "success" ? "Thành công" : "Lỗi"}
+              </p>
+              <p className="text-sm text-gray-600">{notification.message}</p>
+            </div>
+            <button
+              onClick={() => setNotification({ show: false, type: "", message: "" })}
+              className="text-gray-500 hover:text-gray-800 font-bold text-lg"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold text-blue-600 mb-6">Thêm Sản Phẩm</h1>
       {message && <p className="text-red-500 mb-4">{message}</p>}
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
@@ -293,7 +346,6 @@ const AdminProducts = () => {
             {products.map((product) => (
               <tr key={product.id}>
                 <td className="border border-gray-300 px-4 py-2">{product.id}</td>
-
                 <td className="border border-gray-300 px-4 py-2">
                   {(() => {
                     try {
@@ -314,8 +366,6 @@ const AdminProducts = () => {
                     return "Không có hình ảnh"; // Trường hợp không có ảnh hoặc lỗi
                   })()}
                 </td>
-
-
                 <td className="border border-gray-300 px-4 py-2">{product.name}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {categories.find((cat) => cat.id === product.category_id)?.name || "Không xác định"}
@@ -327,25 +377,23 @@ const AdminProducts = () => {
                 <td className="border border-gray-300 px-4 py-2">{product.price} VND</td>
                 <td className="border border-gray-300 px-4 py-2">{product.quantity}</td>
                 <td className="border border-gray-300 px-4 py-2">
-                  <td className="border border-gray-300 px-4 py-2">
-                    <button
-                      className="text-blue-500 hover:underline mr-2"
-                      onClick={() => handleEdit(product)}
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      className="text-red-500 hover:underline"
-                      onClick={() => handleDelete(product.id)}
-                    >
-                      Xóa
-                    </button>
-                  </td>
-
+                  <button
+                    className="text-blue-500 hover:underline mr-2"
+                    onClick={() => handleEdit(product)}
+                  >
+                    Sửa
+                  </button>
+                  <button
+                    className="text-red-500 hover:underline"
+                    onClick={() => handleDelete(product.id)}
+                  >
+                    Xóa
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </div>

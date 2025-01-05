@@ -11,38 +11,38 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminLayout from "./pages/AdminLayout";
 import EditProfile from "./pages/EditProfile";
 import ProductDetail from "./pages/ProductDetail";
-import { CartProvider } from "./pages/CartContext";
+
 
 function App() {
   const isAdminPage = window.location.pathname.includes("admin");
 
   return (
-    <CartProvider>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          {!isAdminPage && <Header />}
-          <div className="flex-grow">
-            <Routes>
-              {/* Các trang không phải admin */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        {!isAdminPage && <Header />}
+        <div className="flex-grow">
+          <Routes>
+            {/* Các trang không phải admin */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
 
-              {/* Các trang admin sử dụng AdminLayout */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} /> {/* Trang admin chính */}
-                <Route path="/admin/products" element={<AdminProducts />} /> {/* Quản lý sản phẩm */}
-                {/* Thêm các route admin khác tại đây */}
-              </Route>
-            </Routes>
-          </div>
-          {!isAdminPage && <Footer />}
+
+
+            {/* Các trang admin sử dụng AdminLayout */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} /> {/* Trang admin chính */}
+              <Route path="/admin/products" element={<AdminProducts />} /> {/* Quản lý sản phẩm */}
+              {/* Thêm các route admin khác tại đây */}
+            </Route>
+          </Routes>
         </div>
-      </Router>
-    </CartProvider>
+        {!isAdminPage && <Footer />}
+      </div>
+    </Router>
   );
 }
 
