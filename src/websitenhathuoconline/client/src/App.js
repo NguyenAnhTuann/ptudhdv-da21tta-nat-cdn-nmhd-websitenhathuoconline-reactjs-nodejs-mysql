@@ -1,41 +1,56 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
+import { Route, BrowserRouter as Router, Routes, useLocation } from "react-router-dom";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLayout from "./pages/AdminLayout";
+import AdminOrders from "./pages/AdminOrders";
+import AdminProducts from "./pages/AdminProducts";
+import Cart from "./pages/Cart";
+import EditProfile from "./pages/EditProfile";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Cart from "./pages/Cart";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProducts from "./pages/AdminProducts";
-import AdminLayout from "./pages/AdminLayout";
-import EditProfile from "./pages/EditProfile";
 import ProductDetail from "./pages/ProductDetail";
+import Register from "./pages/Register";
+import UserOrders from "./pages/UserOrders";
+import AdminUsers from "./pages/AdminUsers";
+import FallingFlowers from "./pages/FallingFlowers";
+
 
 
 function App() {
   const isAdminPage = window.location.pathname.includes("admin");
+
+  const FallingFlowersWrapper = () => {
+    const location = useLocation();
+    return location.pathname === '/' ? <FallingFlowers /> : null; // Chỉ render FallingFlowers khi pathname là '/'
+  };
 
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
         {!isAdminPage && <Header />}
         <div className="flex-grow">
+          <div id="falling-flowers" className="fixed top-0 left-0 w-full h-full pointer-events-none z-50">
+            <FallingFlowersWrapper />
+          </div>
           <Routes>
             {/* Các trang không phải admin */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/cart" element={<Cart />} />
+            <Route path="/gio-hang" element={<Cart />} />
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/product/:id" element={<ProductDetail />} />
-
+            <Route path="/don-hang-cua-ban" element={<UserOrders />} />
 
 
             {/* Các trang admin sử dụng AdminLayout */}
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} /> {/* Trang admin chính */}
-              <Route path="/admin/products" element={<AdminProducts />} /> {/* Quản lý sản phẩm */}
+              <Route index element={<AdminDashboard />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
               {/* Thêm các route admin khác tại đây */}
             </Route>
           </Routes>

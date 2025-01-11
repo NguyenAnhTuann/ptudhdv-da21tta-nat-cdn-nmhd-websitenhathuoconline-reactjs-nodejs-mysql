@@ -1,10 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import Slider from "react-slick";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -19,83 +22,392 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  // Hàm định dạng giá tiền
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      minimumFractionDigits: 0,
-    }).format(price).replace("₫", ""); // Loại bỏ ký hiệu ₫ nếu không cần
-  };
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const searchQuery = searchParams.get("search");
 
-  const handleProductClick = (id) => {
-    navigate(`/product/${id}`); // Điều hướng đến trang chi tiết sản phẩm
-  };
-
-  const handleAddToCart = (product) => {
-    const productToAdd = {
-      name: product.name,
-      price: product.price,
-      quantity: 1, // Số lượng mặc định là 1
-      unit: product.unit,
-      image: JSON.parse(product.images)[0], // Lấy URL ảnh đầu tiên
-    };
-
-    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existingProduct = existingCart.find((item) => item.name === productToAdd.name);
-    if (existingProduct) {
-      existingProduct.quantity += 1;
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      setFilteredProducts(
+        products.filter((product) =>
+          product.name.toLowerCase().includes(lowerCaseQuery)
+        )
+      );
     } else {
-      existingCart.push(productToAdd);
+      setFilteredProducts(products);
     }
+  }, [location.search, products]);
 
-    localStorage.setItem("cart", JSON.stringify(existingCart));
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
+  const settings = {
+    dots: true, // Hiển thị chấm tròn
+    infinite: true, // Tự lặp lại
+    speed: 500, // Tốc độ chuyển slide
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true, // Tự động chạy
+    autoplaySpeed: 3000, // Thời gian tự động chuyển (ms)
+    nextArrow: <SampleNextArrow />, // Nút chuyển tiếp
+    prevArrow: <SamplePrevArrow />, // Nút quay lại
+    appendDots: (dots) => (
+      <div
+        style={{
+          position: "absolute",
+          bottom: "10px",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <ul style={{ display: "flex", gap: "8px" }}>{dots}</ul>
+      </div>
+    ),
+    customPaging: (i) => (
+      <div
+        className={`w-3 h-3 rounded-full transition-colors duration-300 ${i === 0 ? "slick-active bg-blue-500" : "bg-gray-300"
+          }`}
+      />
+    ),
   };
+
+
+  function SampleNextArrow(props) {
+    const { className, onClick } = props;
+    return (
+      <div
+        className={`${className} rounded-full p-5 cursor-pointer`}
+        style={{
+          display: "block",
+          right: "2%", // Khoảng cách từ cạnh phải
+          top: "50%", // Căn giữa theo chiều dọc
+          transform: "translateY(-50%)", // Căn chỉnh đúng giữa slide
+          zIndex: 10,
+        }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props) {
+    const { className, onClick } = props;
+    return (
+      <div
+        className={`${className} rounded-full p-5 cursor-pointer`}
+        style={{
+          display: "block",
+          left: "0.8%", // Khoảng cách từ cạnh trái
+          top: "50%", // Căn giữa theo chiều dọc
+          transform: "translateY(-50%)", // Căn chỉnh đúng giữa slide
+          zIndex: 10,
+        }}
+        onClick={onClick}
+      />
+    );
+  }
+
+
 
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
-      <div className="container mx-auto my-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Danh Sách Sản Phẩm</h1>
-        <div className="grid grid-cols-4 gap-8">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="border rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white"
-              style={{ height: "450px" }}
-            >
-              <div className="h-1/2 flex justify-center items-center">
+      {/* Slider bên trái và ảnh bên phải */}
+      <div className="bg-gray-100 py-8">
+        <div className="container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Slider bên trái */}
+          <div className="col-span-2 relative">
+            <Slider {...settings}>
+              <div className="rounded-xl">
                 <img
-                  src={JSON.parse(product.images)[0]}
-                  alt={product.name}
-                  className="object-cover h-full w-auto max-h-full rounded-md"
+                  src="https://cdn.nhathuoclongchau.com.vn/unsafe/828x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/banner_web_pc_1610x492_313aeadd9c.jpg"
+                  alt="Slide 1"
+                  className="rounded-xl w-full h-auto"
                 />
               </div>
-              <div className="mt-4">
-                <h2
-                  className="text-lg font-semibold text-gray-800 truncate cursor-pointer"
-                  onClick={() => handleProductClick(product.id)}
-                >
-                  {product.name}
-                </h2>
-                <p className="text-blue-600 font-bold text-xl mt-2">
-                  {formatPrice(product.price)}VNĐ / {product.unit}
-                </p>
-                <p className="text-gray-500 text-sm mt-2 line-clamp-2">
-                  {product.description}
-                </p>
-                <button
-                  className="bg-blue-500 text-white px-6 py-2 rounded-full mt-4 w-full font-medium hover:bg-blue-600 transition duration-300"
-                  onClick={() => handleAddToCart(product)} // Gắn chức năng thêm vào giỏ hàng
-                >
-                  Chọn mua
-                </button>
+              <div>
+                <img
+                  src="https://cdn.nhathuoclongchau.com.vn/unsafe/828x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Camp2025_Vitabiotic_Homepage_PC_c77d008037.jpg"
+                  alt="Slide 2"
+                  className="rounded-lg w-full h-auto"
+                />
               </div>
+              <div>
+                <img
+                  src="https://cdn.nhathuoclongchau.com.vn/unsafe/828x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/BANNER_WEB_Banner_Web_PC_1610x492_6be326ba69.jpg"
+                  alt="Slide 3"
+                  className="rounded-lg w-full h-auto"
+                />
+              </div>
+              <div>
+                <img
+                  src="https://cdn.nhathuoclongchau.com.vn/unsafe/828x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Banner_Web_PC_1610x492_0e7e346a33.png"
+                  alt="Slide 3"
+                  className="rounded-lg w-full h-auto"
+                />
+              </div>
+            </Slider>
+          </div>
+
+          {/* Hai ảnh bên phải */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <img
+                src="https://cdn.nhathuoclongchau.com.vn/unsafe/425x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/399x117_49d70d4809_1dbe50dd49.png"
+                alt="Banner phải trên"
+                className="rounded-lg shadow-lg w-full h-auto"
+              />
             </div>
-          ))}
+            <div>
+              <img
+                src="https://cdn.nhathuoclongchau.com.vn/unsafe/425x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/PC_3d7805381e.png"
+                alt="Banner phải dưới"
+                className="rounded-lg shadow-lg w-full h-auto"
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Phần các ô thông tin */}
+      <div className="bg-gray-100">
+        <div className="container mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/canmuathuoc_29bf521996.png"
+              alt="Cần mua thuốc"
+              className="w-10 h-10 mb-2"
+            />
+            <span className="text-sm font-bold text-gray-700">Cần mua thuốc</span>
+          </div>
+          <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/tuvanvoiduocsi_1855320b40.png"
+              alt="Tư vấn với Dược Sỹ"
+              className="w-10 h-10 mb-2"
+            />
+            <span className="text-sm font-bold text-gray-700">
+              Tư vấn với Dược Sỹ
+            </span>
+          </div>
+          <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/timnhathuoc_cbadb52c85.png"
+              alt="Tìm nhà thuốc"
+              className="w-10 h-10 mb-2"
+            />
+            <span className="text-sm font-bold text-gray-700">Tìm nhà thuốc</span>
+          </div>
+          <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/doncuatoi_5058ac6058.png"
+              alt="Đơn của tôi"
+              className="w-10 h-10 mb-2"
+            />
+            <span className="text-sm font-bold text-gray-700">Đơn của tôi</span>
+          </div>
+          <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/vaccine_013e37b079.png"
+              alt="Tiêm Vắc xin"
+              className="w-10 h-10 mb-2"
+            />
+            <span className="text-sm font-bold text-gray-700">Tiêm Vắc xin</span>
+          </div>
+          <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/kiemtrasuckhoe_15f6ff48e9.png"
+              alt="Kiểm tra sức khoẻ"
+              className="w-10 h-10 mb-2"
+            />
+            <span className="text-sm font-bold text-gray-700">
+              Kiểm tra sức khoẻ
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+      {/* Danh sách sản phẩm */}
+      <div className="bg-blue-100 w-full my-8">
+        {/* Container giữ nội dung chính */}
+        <div className="container mx-auto">
+          <div className="relative text-center py-6">
+            {/* Hình ảnh tiêu đề */}
+            <img
+              alt="Sản phẩm bán chạy"
+              loading="lazy"
+              width="320"
+              height="40"
+              decoding="async"
+              className="w-[320px] absolute top-[-10px] left-1/2 transform -translate-x-1/2"
+              srcSet="https://cdn.nhathuoclongchau.com.vn/unsafe/320x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/tittle_san_pham_ban_chay_16118bb601.png 1x, https://cdn.nhathuoclongchau.com.vn/unsafe/640x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/tittle_san_pham_ban_chay_16118bb601.png 2x"
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/640x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/tittle_san_pham_ban_chay_16118bb601.png"
+              style={{ color: "transparent" }}
+            />
+            {/* Chữ hiển thị lên ảnh */}
+            <span className="absolute top-0 left-1/2 transform -translate-x-1/2 translate-y-[-5px] text-white text-lg font-bold">
+              Sản phẩm bán chạy
+            </span>
+          </div>
+
+          {/* Lưới sản phẩm */}
+          <div className="grid grid-cols-6 gap-4 mt-8">
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className="border rounded-3xl bg-white p-4 shadow-md hover:shadow-lg transition"
+              >
+                {/* Ảnh sản phẩm */}
+                <div className="relative">
+                  <img
+                    src={JSON.parse(product.images)[0]}
+                    alt={product.name}
+                    className="w-full h-[200px] object-cover rounded"
+                  />
+                  {/* <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    -{product.discount || 0}%
+                  </span> */}
+                </div>
+
+                {/* Thông tin sản phẩm */}
+                <div className="mt-4">
+                  <h3
+                    className="overflow-hidden text-gray-10 text-body2 font-semibold line-clamp-2 md:line-clamp-3 mb-1 md:mb-2"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    {product.name}
+                  </h3>
+                  <p className="text-blue-500 font-semibold text-lg mt-2">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(product.price)}
+                  </p>
+                  <p className="text-caption font-normal text-gray-6 line-through md:text-label2">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(product.oldPrice || product.price * 1.2)}
+                  </p>
+                  <p className="text-orange-500 text-xs mt-2">{product.soldInfo}</p>
+                  <button
+                    className="bg-blue-500 text-white text-sm px-4 py-2 rounded-3xl mt-4 w-full font-medium hover:bg-blue-600 transition"
+                    onClick={() => alert("Chức năng thêm vào giỏ hàng đang cập nhật")}
+                  >
+                    Chọn mua
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Phần Banner */}
+        <div className="container mx-auto">
+          {/* Banner chính */}
+          <div className="w-full mb-4">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/1080x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Main_Banner_Web_1216x176_a4e731ab77.png"
+              alt="Banner chính"
+              className="w-full h-auto rounded-lg"
+            />
+          </div>
+
+          {/* Hai Banner phụ */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/1080x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Sub_banner_598x176_9596d676ef.png"
+              alt="Banner phụ 1"
+              className="w-full h-auto rounded-lg"
+            />
+            <img
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/1080x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Sub_banner_598x176_1_5a7e5b86a1.png"
+              alt="Banner phụ 2"
+              className="w-full h-auto rounded-lg"
+            />
+          </div>
+        </div>
+
+        {/* Thương hiệu yêu thích */}
+        <div className="container mx-auto my-8">
+          <div className="flex items-center space-x-2 mb-4">
+            {/* Biểu tượng */}
+            <img
+              alt="Thương hiệu yêu thích"
+              loading="lazy"
+              width="28"
+              height="28"
+              decoding="async"
+              className="h-7 w-7 shrink-0"
+              srcSet="https://cdn.nhathuoclongchau.com.vn/unsafe/28x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/thuong_hieu_yeu_thich_e0c23dded6.png 1x, https://cdn.nhathuoclongchau.com.vn/unsafe/64x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/thuong_hieu_yeu_thich_e0c23dded6.png 2x"
+              src="https://cdn.nhathuoclongchau.com.vn/unsafe/64x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/thuong_hieu_yeu_thich_e0c23dded6.png"
+              style={{ color: "transparent" }}
+            />
+            {/* Tiêu đề */}
+            <h2 className="text-xl font-bold text-gray-800">
+              <span className="text-blue-500 mr-2"></span> Thương hiệu yêu thích
+            </h2>
+          </div>
+
+          {/* Lưới Thương hiệu */}
+          <div className="grid grid-cols-6 gap-4">
+            {[
+              {
+                logo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_03542_6bfa8a6508.jpg",
+                name: "JapanWell",
+                discount: "Giảm đến 35%",
+                smallLogo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/Jpanwell_2_81e568c17e.png",
+              },
+              {
+                logo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00015043_blood_sugar_control_60v_8171_63e1_large_851cd54510.jpg",
+                name: "Vitamins For Life",
+                discount: "Giảm đến 20%",
+                smallLogo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Vitamins_For_Life_1_0783ec2683.png",
+              },
+              {
+                logo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_01888_3d01e5bc4d.jpg",
+                name: "Kenko",
+                discount: "Giảm đến 20%",
+                smallLogo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/brand_logo_18cc2a11e5.png",
+              },
+              {
+                logo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_00496_5a21af92e5.jpg",
+                name: "Vitabiotics",
+                discount: "Voucher giảm đến 30%",
+                smallLogo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/Vitabiotics_1_8d1424372d.png",
+              },
+              {
+                logo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00018993_blue_berry_plus_ojenvitamin_new_nordic_2x20v_2634_6327_large_00cb23abcf.jpg",
+                name: "New Nordic",
+                discount: "Giảm đến 20%",
+                smallLogo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/NEW_NORDIC_1_3ef22172fd.png",
+              },
+              {
+                logo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00502343_nuoc_hong_sam_mat_ong_kwangdong_10_chai_x_170ml_2144_63aa_large_b97c691a39.jpg",
+                name: "Kwangdong",
+                discount: "Giảm đến 20%",
+                smallLogo: "https://cdn.nhathuoclongchau.com.vn/unsafe/256x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/kwangdong_logo_f3d9212acb.png",
+              },
+            ].map((brand, index) => (
+              <div
+                key={index}
+                className="border rounded-2xl p-4 bg-white text-center shadow-md hover:shadow-lg transition"
+              >
+                {/* Ảnh lớn */}
+                <img
+                  src={brand.logo}
+                  alt={brand.name}
+                  className="w-full h-auto mx-auto mb-2 object-contain"
+                />
+                {/* Logo nhỏ */}
+                <img
+                  src={brand.smallLogo}
+                  alt={`${brand.name} logo`}
+                  className="w-full h-auto mx-auto object-contain mt-6 border-2 rounded-lg"
+                />
+                <p className="text-blue-500 text-sm font-medium mt-4">{brand.discount}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div >
   );
 };
 

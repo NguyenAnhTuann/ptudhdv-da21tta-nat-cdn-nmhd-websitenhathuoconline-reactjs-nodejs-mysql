@@ -3,3 +3,23 @@
 @tailwind utilities;
 
 @import "~@fortawesome/fontawesome-free/css/all.min.css";
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
+.slick-dots {
+    @apply absolute bottom-4 left-0 right-0 flex justify-center gap-2;
+  }
+  
+  .slick-dots li {
+    @apply w-3 h-3 mx-1 flex justify-center items-center;
+  }
+  
+  .slick-dots li div {
+    @apply bg-gray-300 rounded-full; /* Chấm tròn mặc định */
+    transition: background-color 0.3s ease;
+  }
+  
+  .slick-dots li.slick-active div {
+    @apply bg-gray-500; /* Màu chấm tròn khi đang active */
+  }
+  

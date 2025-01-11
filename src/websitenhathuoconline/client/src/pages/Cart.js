@@ -4,12 +4,13 @@ const Cart = () => {
   const [cart, setCart] = useState([]);
   const [checkedItems, setCheckedItems] = useState([]);
 
-
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    console.log(storedCart);
     setCart(storedCart);
-    setCheckedItems(new Array(storedCart.length).fill(true)); // Mặc định tất cả sản phẩm được chọn
+    setCheckedItems(new Array(storedCart.length).fill(true));
   }, []);
+  
 
   const handleIncrease = (index) => {
     const updatedCart = [...cart];
@@ -45,7 +46,6 @@ const Cart = () => {
     setCheckedItems(new Array(cart.length).fill(isChecked));
   };
 
-  // Tính tổng tiền
   const calculateTotal = () => {
     return cart.reduce((total, item, index) => {
       if (checkedItems[index]) {
@@ -61,12 +61,26 @@ const Cart = () => {
     const userId = 1; // ID người dùng (giả định)
     const products = cart
       .filter((_, index) => checkedItems[index])
-      .map((item) => ({
-        id: item.id, // ID sản phẩm
-        quantity: item.quantity,
-        price: item.price, // Giá sản phẩm
-      }));
+      .map((item) => {
+        if (!item.id) {
+          console.error("Product ID is missing for item:", item);
+          return null;
+        }
+        return {
+          product_id: item.id, // Đảm bảo gửi đúng `product_id`
+          quantity: item.quantity,
+          price: item.price,
+        };
+      })
+      .filter((product) => product !== null); // Chỉ giữ sản phẩm hợp lệ
+
     const status = "Chưa nhận hàng";
+
+    // Kiểm tra nếu không có sản phẩm nào được chọn
+    if (products.length === 0) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để đặt hàng.");
+      return;
+    }
 
     try {
       const response = await fetch("http://localhost:5000/api/orders/create-order", {
@@ -89,9 +103,6 @@ const Cart = () => {
     }
   };
 
-
-
-
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
       <div className="container mx-auto my-8 px-4">
@@ -112,6 +123,7 @@ const Cart = () => {
                         onChange={handleSelectAll}
                       />
                     </th>
+                    <th className="py-2 px-4">ID</th>
                     <th className="py-2 px-4">Sản phẩm</th>
                     <th className="py-2 px-4">Giá thành</th>
                     <th className="py-2 px-4">Số lượng</th>
@@ -129,6 +141,7 @@ const Cart = () => {
                           onChange={() => handleCheckboxChange(index)}
                         />
                       </td>
+                      <td className="py-4 px-4">{item.id}</td>
                       <td className="py-4 px-4 flex items-center gap-4">
                         <img
                           src={item.image}

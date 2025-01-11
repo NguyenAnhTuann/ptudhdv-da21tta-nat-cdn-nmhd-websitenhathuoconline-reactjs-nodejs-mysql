@@ -30,25 +30,26 @@ const ProductDetail = () => {
 
     const handleAddToCart = () => {
         const productToAdd = {
-            id: product.id,
+            id: product.id, // Đảm bảo có `id`
             name: product.name,
             price: product.price,
-            quantity: 1, // Số lượng mặc định là 1
+            quantity: 1, // Mặc định số lượng là 1
             unit: product.unit,
-            image: JSON.parse(product.images)[0], // Lấy URL ảnh đầu tiên
+            image: JSON.parse(product.images)[0], // Lấy ảnh đầu tiên
         };
 
         const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-        const existingProduct = existingCart.find((item) => item.name === productToAdd.name);
+        const existingProduct = existingCart.find((item) => item.id === productToAdd.id); // So sánh bằng ID
         if (existingProduct) {
-            existingProduct.quantity += 1;
+            existingProduct.quantity += 1; // Nếu sản phẩm đã tồn tại, tăng số lượng
         } else {
-            existingCart.push(productToAdd);
+            existingCart.push(productToAdd); // Nếu chưa tồn tại, thêm sản phẩm mới
         }
 
-        localStorage.setItem("cart", JSON.stringify(existingCart));
+        localStorage.setItem("cart", JSON.stringify(existingCart)); // Lưu giỏ hàng
         alert("Đã thêm sản phẩm vào giỏ hàng!");
     };
+
 
 
     return (

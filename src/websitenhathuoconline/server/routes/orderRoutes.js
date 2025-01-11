@@ -6,12 +6,15 @@ router.post("/create-order", async (req, res) => {
   const { userId, products, status } = req.body;
 
   try {
-    // Lưu từng sản phẩm vào bảng `orders`
     for (const product of products) {
-      const totalPrice = product.price * product.quantity; // Tính tổng tiền cho từng sản phẩm
+      if (!product.product_id) {
+        return res.status(400).json({ message: "Product ID is required." });
+      }
+
+      const totalPrice = product.price * product.quantity;
       await db.query(
         "INSERT INTO orders (user_id, product_id, quantity, total_price, status) VALUES (?, ?, ?, ?, ?)",
-        [userId, product.id, product.quantity, totalPrice, status]
+        [userId, product.product_id, product.quantity, totalPrice, status]
       );
     }
 
@@ -21,5 +24,6 @@ router.post("/create-order", async (req, res) => {
     res.status(500).json({ message: "Failed to create order" });
   }
 });
+
 
 module.exports = router;
