@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../images/logo.png";
+import { ImBullhorn } from "react-icons/im";
+
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -24,20 +26,25 @@ const Header = () => {
     <header
       className="text-white"
       style={{
-        backgroundImage: "url('https://res.cloudinary.com/duk8odqun/image/upload/v1736620288/Logotimdothatlac_22_pgwvvs.png')",
+        backgroundImage: "url('https://res.cloudinary.com/duk8odqun/image/upload/v1736653947/Frame_1_4_uu2i8v.png')",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
+        minHeight: "150px",
       }}
     >
       <div className="container mx-auto">
         {/* Dòng thông tin bổ sung */}
         <div className="flex justify-between py-2 text-sm">
           <div>
-            <span className="mr-4">
-              <i className="fas fa-bullhorn"></i> Trung tâm tiêm chủng NGUYEN ANH TUAN
+            <span className="mr-4 flex items-center">
+              <ImBullhorn className="mr-2 text-lg text-white" />
+              <span className="md:text-body2 text-caption2 font-semibold text-white">
+                Trung tâm tiêm chủng NGUYEN ANH TUAN
+              </span>
               <a href="/detail" className="underline ml-1">Xem chi tiết</a>
             </span>
+
           </div>
           <div className="flex space-x-4">
             <span>
@@ -149,10 +156,8 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <div className="bg-blue-500 text-blue-500">
-            .
-      </div>
     </header>
+
   );
 };
 

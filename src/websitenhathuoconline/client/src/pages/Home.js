@@ -2,12 +2,15 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Slider from "react-slick";
+import CountdownTimer from "./CountdownTimer";
+
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const [filteredProducts, setFilteredProducts] = useState([]);
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -77,9 +80,9 @@ const Home = () => {
         className={`${className} rounded-full p-5 cursor-pointer`}
         style={{
           display: "block",
-          right: "2%", // Khoảng cách từ cạnh phải
-          top: "50%", // Căn giữa theo chiều dọc
-          transform: "translateY(-50%)", // Căn chỉnh đúng giữa slide
+          right: "2%",
+          top: "50%",
+          transform: "translateY(-50%)",
           zIndex: 10,
         }}
         onClick={onClick}
@@ -94,9 +97,9 @@ const Home = () => {
         className={`${className} rounded-full p-5 cursor-pointer`}
         style={{
           display: "block",
-          left: "0.8%", // Khoảng cách từ cạnh trái
-          top: "50%", // Căn giữa theo chiều dọc
-          transform: "translateY(-50%)", // Căn chỉnh đúng giữa slide
+          left: "0.8%",
+          top: "50%",
+          transform: "translateY(-50%)",
           zIndex: 10,
         }}
         onClick={onClick}
@@ -104,6 +107,91 @@ const Home = () => {
     );
   }
 
+  const saleProducts = [
+    {
+      id: 1,
+      name: "Sữa rửa mặt Transino Clear Wash EX",
+      price: 415000,
+      oldPrice: 500000,
+      discount: 17,
+      image:
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/144x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00503585_sua_rua_mat_duong_trang_da_tri_nam_transino_clear_wash_ex_100g_5357_6411_large_6253370bb6.jpg",
+      soldInfo: "Mở bán 30 suất",
+    },
+    {
+      id: 2,
+      name: "Khử mùi dạng xịt Etiaxil Deodorant Anti",
+      price: 240000,
+      oldPrice: 290000,
+      discount: 17,
+      image:
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/144x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_06058_3c56e48f6b.jpg",
+      soldInfo: "Mở bán 30 suất",
+    },
+    {
+      id: 3,
+      name: "Kem dưỡng ẩm Cetaphil Moisturizing Cream",
+      price: 190900,
+      oldPrice: 230000,
+      discount: 17,
+      image:
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/144x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/052408_Cetaphil_US_Moisturizing_Cream_3oz_CLEAR_pack_2a5072c450.png",
+      soldInfo: "Mở bán 30 suất",
+    },
+    {
+      id: 4,
+      name: "Sữa tăng cân Appeton Weight Gain",
+      price: 922500,
+      oldPrice: 1025000,
+      discount: 10,
+      image:
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/144x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_04209_5816b3a584.jpg",
+      soldInfo: "Đã bán 1/100 suất",
+    },
+    {
+      id: 5,
+      name: "Viên uống BiogastrolIBS BiovaGen",
+      price: 524000,
+      oldPrice: 655000,
+      discount: 20,
+      image:
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/144x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/DSC_04798_c7a03c49df.jpg",
+      soldInfo: "Mở bán 100 suất",
+    },
+    {
+      id: 6,
+      name: "Sữa bột Nepro 1 Gold VitaDairy",
+      price: 193600,
+      oldPrice: 242000,
+      discount: 20,
+      image:
+        "https://cdn.nhathuoclongchau.com.vn/unsafe/144x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/00016524_nepro_1_gold_400g_5081_5e78_large_17ca9ce857.JPG",
+      soldInfo: "Mở bán 100 suất",
+    },
+  ];
+
+  const handleAddToCart = (product) => {
+    const productToAdd = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      unit: product.unit || "sản phẩm", // Nếu không có unit, đặt mặc định
+      image: JSON.parse(product.images)[0], // Lấy ảnh đầu tiên
+    };
+
+    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+    const existingProduct = existingCart.find((item) => item.id === productToAdd.id);
+
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      existingCart.push(productToAdd);
+    }
+
+    localStorage.setItem("cart", JSON.stringify(existingCart));
+    alert("Đã thêm sản phẩm vào giỏ hàng!");
+  };
 
 
   return (
@@ -167,7 +255,7 @@ const Home = () => {
 
       {/* Phần các ô thông tin */}
       <div className="bg-gray-100">
-        <div className="container mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="container mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 cursor-pointer">
           <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
             <img
               src="https://cdn.nhathuoclongchau.com.vn/unsafe/40x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/smalls/canmuathuoc_29bf521996.png"
@@ -223,6 +311,108 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Phần Sản phẩm Sale */}
+      <div className=" w-full py-8">
+        <div className="container mx-auto">
+          {/* Flash Sale Header */}
+          <div
+            className="container mx-auto"
+            style={{
+              overflow: "hidden",
+              borderRadius: "0px",
+            }}
+          >
+            <div
+              className="relative text-white p-6 flex flex-col items-center justify-center"
+              style={{
+                backgroundImage: "url('https://cdn.nhathuoclongchau.com.vn/unsafe/1280x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Flashsale_Banner_HP_Desk_1216x190_HP_8b205e2047.png')",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
+                width: "100%",
+                height: "250px",
+              }}
+            >
+              <h2 className="text-blue-600">.</h2>
+              <h2 className="text-blue-600">.</h2>
+              <h2 className="text-blue-600">.</h2>
+              <h2 className="text-blue-600">.</h2>
+              <h2 className="text-blue-600">.</h2>
+              <CountdownTimer endTime={new Date().setHours(14, 0, 0)} />
+            </div>
+          </div>
+
+
+          {/* Flash Sale Products */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 mt-6">
+            {saleProducts.map((product) => (
+              <div
+                key={product.id}
+                className="border rounded-3xl bg-gray-50 p-4 shadow-md hover:shadow-lg transition hover:border-blue-600 relative min-h-[450px] flex flex-col"
+              >
+                {/* Ảnh sản phẩm */}
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-[200px] object-cover rounded"
+                  />
+                  <span
+                    className="absolute top-2 left-2 bg-red-500 text-white text-xs px-3 py-1 rounded-tr-2xl rounded-bl-2xl"
+                  >
+                    -{product.discount}%
+                  </span>
+                </div>
+
+                {/* Thông tin sản phẩm */}
+                <div className="mt-4 flex flex-col flex-grow">
+                  <h3
+                    className="overflow-hidden text-gray-10 text-body2 font-semibold line-clamp-2 md:line-clamp-3 mb-1 md:mb-2 cursor-pointer"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    {product.name}
+                  </h3>
+                  <p className="text-blue-600 font-semibold text-lg">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(product.price)}
+                  </p>
+                  <p className="text-gray-400 line-through text-sm">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(product.oldPrice)}
+                  </p>
+
+                  {/* Đã bán X/Y suất */}
+                  <div className="flex items-center mt-2 whitespace-nowrap">
+                    <div className="bg-orange-100 text-orange-600 text-xs px-3 py-1 rounded-full flex items-center">
+                      <span className="mr-1 text-orange-500">
+                        <i className="fas fa-fire"></i>
+                      </span>
+                      Đã bán {product.soldInfo}
+                    </div>
+                  </div>
+
+                  {/* Nút chọn mua */}
+                  <button
+                    className="bg-blue-500 text-white text-sm px-4 py-2 rounded-3xl mt-4 w-full font-medium hover:bg-blue-600 transition"
+                    onClick={() => alert("Chức năng thêm vào giỏ hàng đang cập nhật")}
+                  >
+                    Chọn mua
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+
 
       {/* Danh sách sản phẩm */}
       <div className="bg-blue-100 w-full my-8">
@@ -252,24 +442,23 @@ const Home = () => {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="border rounded-3xl bg-white p-4 shadow-md hover:shadow-lg transition"
+                className="border rounded-3xl bg-white p-4 shadow-md hover:shadow-lg transition hover:border-blue-600"
               >
                 {/* Ảnh sản phẩm */}
-                <div className="relative">
+                <div className="relative cursor-pointer"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
                   <img
                     src={JSON.parse(product.images)[0]}
                     alt={product.name}
                     className="w-full h-[200px] object-cover rounded"
                   />
-                  {/* <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                    -{product.discount || 0}%
-                  </span> */}
                 </div>
 
                 {/* Thông tin sản phẩm */}
                 <div className="mt-4">
                   <h3
-                    className="overflow-hidden text-gray-10 text-body2 font-semibold line-clamp-2 md:line-clamp-3 mb-1 md:mb-2"
+                    className="overflow-hidden text-gray-10 text-body2 font-semibold line-clamp-2 md:line-clamp-3 mb-1 md:mb-2 cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
                     {product.name}
@@ -289,10 +478,11 @@ const Home = () => {
                   <p className="text-orange-500 text-xs mt-2">{product.soldInfo}</p>
                   <button
                     className="bg-blue-500 text-white text-sm px-4 py-2 rounded-3xl mt-4 w-full font-medium hover:bg-blue-600 transition"
-                    onClick={() => alert("Chức năng thêm vào giỏ hàng đang cập nhật")}
+                    onClick={() => handleAddToCart(product)}
                   >
                     Chọn mua
                   </button>
+
                 </div>
               </div>
             ))}
@@ -387,7 +577,7 @@ const Home = () => {
             ].map((brand, index) => (
               <div
                 key={index}
-                className="border rounded-2xl p-4 bg-white text-center shadow-md hover:shadow-lg transition"
+                className="border rounded-2xl p-8 bg-white text-center shadow-md hover:shadow-lg transition"
               >
                 {/* Ảnh lớn */}
                 <img
