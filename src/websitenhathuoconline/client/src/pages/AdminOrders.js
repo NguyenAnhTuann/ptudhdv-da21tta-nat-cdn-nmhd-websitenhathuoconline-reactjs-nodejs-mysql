@@ -49,7 +49,6 @@ const AdminOrders = () => {
         })
       );
 
-      // Cập nhật trạng thái trong frontend
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.created_at === time ? { ...order, status: newStatus } : order
@@ -62,9 +61,8 @@ const AdminOrders = () => {
 
   if (loading) return <p>Loading...</p>;
 
-  // Nhóm các sản phẩm theo thời gian đầy đủ `created_at`
   const groupedOrders = orders.reduce((acc, order) => {
-    const orderTime = order.created_at; // Nhóm theo thời gian đầy đủ
+    const orderTime = order.created_at;
     if (!acc[orderTime]) {
       acc[orderTime] = {
         created_at: order.created_at,
@@ -73,7 +71,7 @@ const AdminOrders = () => {
         user_address: order.user_address,
         status: order.status,
         total_price: 0,
-        total_quantity: 0, // Tổng số sản phẩm
+        total_quantity: 0,
         products: [],
       };
     }
@@ -89,70 +87,123 @@ const AdminOrders = () => {
   }, {});
 
   return (
-    <div className="container mx-auto my-8">
-      <h1 className="text-2xl font-bold mb-4">Quản lý đơn hàng</h1>
+    <div className="container mx-auto my-8 px-4">
+      {/* Nút quay lại */}
+      <div className="flex items-center mb-6">
+        <button
+          onClick={() => window.location.href = "/admin"}
+          className="flex items-center text-blue-600 hover:underline"
+        >
+          <span className="mr-2 text-2xl">⭠</span>
+          <span className="text-lg font-medium">Quay lại</span>
+        </button>
+      </div>
+
+      {/* Khi không có đơn hàng */}
       {Object.keys(groupedOrders).length === 0 ? (
-        <p>Không có đơn hàng nào.</p>
+        <div className="text-center bg-gray-100 p-8 rounded-lg shadow-md">
+          <p className="text-lg text-gray-600 mb-4">
+            Không có đơn hàng nào.
+          </p>
+        </div>
       ) : (
         Object.values(groupedOrders).map((order, index) => (
           <div
             key={index}
-            className="mb-8 border border-gray-300 rounded-lg p-4 shadow-lg bg-gray-50"
+            className="mb-8 border border-gray-300 rounded-lg shadow-lg bg-white overflow-hidden"
           >
-            <h2 className="text-xl font-semibold mb-4">
-              Thời gian: {new Date(order.created_at).toLocaleString("en-GB")}
-            </h2>
-            <div className="mb-4">
-              <p className="text-lg text-gray-700">
-                <strong>Tên khách hàng:</strong> {order.user_name}
-              </p>
-              <p className="text-lg text-gray-700">
-                <strong>Số điện thoại:</strong> {order.user_phone}
-              </p>
-              <p className="text-lg text-gray-700">
-                <strong>Địa chỉ:</strong> {order.user_address}
-              </p>
+            {/* Header đơn hàng */}
+            <div className="bg-blue-50 border-b p-4 border-gray-300">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                {/* Thông tin đơn hàng */}
+                <div className="mb-4 md:mb-0">
+                  <h2 className="text-xl font-bold text-gray-800">
+                    <span className="mr-2">🕒</span>
+                    Thời gian: {new Date(order.created_at).toLocaleString("en-GB")}
+                  </h2>
+                  <p className="text-gray-700 text-lg mt-1">
+                    <span className="mr-2">👤</span>
+                    <strong>Tên:</strong> {order.user_name}
+                  </p>
+                  <p className="text-gray-700 text-lg mt-1">
+                    <span className="mr-2">📞</span>
+                    <strong>Điện thoại:</strong> {order.user_phone}
+                  </p>
+                  <p className="text-gray-700 text-lg mt-1">
+                    <span className="mr-2">🏠</span>
+                    <strong>Địa chỉ:</strong> {order.user_address}
+                  </p>
+                  <p className="text-gray-700 text-lg mt-1">
+                    <span>------------------------------</span>
+                  </p>
+                  <p className="text-gray-700 text-lg mt-1">
+                    <span className="mr-2">📦</span>
+                    Tổng sản phẩm: <span className="font-semibold text-blue-600">{order.total_quantity}</span>
+                  </p>
+                  <p className="text-gray-700 text-lg mt-1">
+                    <span className="mr-2">💰</span>
+                    Tổng giá trị: <span className="font-semibold text-blue-600">{formatPrice(order.total_price)}</span>
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Trạng thái đơn hàng */}
+              <div className="mt-4">
+                <p className="text-lg font-medium">
+                  <span className="mr-2">📋</span>
+                  Trạng thái:
+                  <span
+                    className={`ml-1 font-semibold ${order.status === "Đã giao hàng"
+                      ? "text-green-600"
+                      : order.status === "Đang xử lý"
+                        ? "text-orange-600"
+                        : "text-red-600"
+                      }`}
+                  >
+                    {order.status}
+                  </span>
+                </p>
+              </div>
             </div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Tổng giá trị đơn hàng: {formatPrice(order.total_price)}
-            </h3>
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Tổng số sản phẩm: {order.total_quantity}
-            </h3>
-            <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow">
+
+            {/* Chi tiết sản phẩm */}
+            <table className="min-w-full bg-white">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="py-4 px-6 border-b text-center whitespace-normal">
-                    Sản phẩm
-                  </th>
-                  <th className="py-4 px-6 border-b text-center">Số lượng</th>
-                  <th className="py-4 px-6 border-b text-center">Tổng giá</th>
+                <tr className="bg-gray-100 text-gray-700 text-left">
+                  <th className="py-3 px-6 font-semibold text-center">Sản phẩm</th>
+                  <th className="py-3 px-6 font-semibold text-center">Số lượng</th>
+                  <th className="py-3 px-6 font-semibold text-center">Giá</th>
                 </tr>
               </thead>
               <tbody>
                 {order.products.map((product, index) => (
-                  <tr key={index}>
-                    <td className="py-4 px-6 border-b text-center whitespace-normal break-words">
+                  <tr key={index} className="hover:bg-gray-50 transition">
+                    <td className="py-4 px-6 border-b text-center text-gray-700">
                       {product.product_name}
                     </td>
-                    <td className="py-4 px-6 border-b text-center">{product.quantity}</td>
-                    <td className="py-4 px-6 border-b text-center">
+                    <td className="py-4 px-6 border-b border-l text-center text-gray-700">
+                      {product.quantity}
+                    </td>
+                    <td className="py-4 px-6 border-b border-l text-center text-gray-700">
                       {formatPrice(product.total_price)}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="mt-4 flex items-center justify-between">
+
+            {/* Footer */}
+            <div className="flex items-center justify-between bg-gray-100 p-4 border-gray-300">
               <div className="flex items-center">
-                <label htmlFor={`status-${index}`} className="mr-4 font-semibold">
+                <label htmlFor={`status-${index}`} className="mr-4 font-semibold text-gray-700">
                   Trạng thái:
                 </label>
                 <select
                   id={`status-${index}`}
                   value={order.status}
                   onChange={(e) => updateOrderStatus(order.created_at, e.target.value)}
-                  className="border rounded px-2 py-1"
+                  className="border border-gray-300 rounded px-2 py-1 focus:ring focus:ring-blue-400"
                 >
                   <option value="Chưa nhận hàng">Chưa nhận hàng</option>
                   <option value="Đang xử lý">Đang xử lý</option>
@@ -162,11 +213,12 @@ const AdminOrders = () => {
               </div>
               <button
                 onClick={() => updateOrderStatus(order.created_at, "Đã giao hàng")}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
               >
                 Đánh dấu đã giao
               </button>
             </div>
+
           </div>
         ))
       )}

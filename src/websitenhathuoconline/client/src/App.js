@@ -15,7 +15,10 @@ import Register from "./pages/Register";
 import UserOrders from "./pages/UserOrders";
 import AdminUsers from "./pages/AdminUsers";
 import FallingFlowers from "./pages/FallingFlowers";
-
+import AdminCategories from "./pages/AdminCategories";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import BackgroundMusic from "./pages/BackgroundMusic";
 
 
 function App() {
@@ -23,11 +26,12 @@ function App() {
 
   const FallingFlowersWrapper = () => {
     const location = useLocation();
-    return location.pathname === '/' ? <FallingFlowers /> : null; // Chỉ render FallingFlowers khi pathname là '/'
+    return location.pathname === '/' ? <FallingFlowers /> : null;
   };
 
   return (
     <Router>
+      <BackgroundMusic />
       <div className="flex flex-col min-h-screen">
         {!isAdminPage && <Header />}
         <div className="flex-grow">
@@ -43,6 +47,8 @@ function App() {
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/don-hang-cua-ban" element={<UserOrders />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
 
             {/* Các trang admin sử dụng AdminLayout */}
@@ -51,6 +57,7 @@ function App() {
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/categories" element={<AdminCategories />} />
               {/* Thêm các route admin khác tại đây */}
             </Route>
           </Routes>

@@ -20,22 +20,23 @@ module.exports = {
             opacity: '0.8',
           },
           '75%': {
-            transform: 'translateX(-20px) translateY(75vh) rotate(270deg)', // Đổi hướng gió
+            transform: 'translateX(-20px) translateY(75vh) rotate(270deg)',
             opacity: '0.5',
           },
           '100%': {
-            transform: 'translateX(100px) translateY(100vh) rotate(360deg)', // Kết thúc
+            transform: 'translateX(100px) translateY(100vh) rotate(360deg)',
             opacity: '0',
           },
         },
+        
       },
 
       animation: {
-        fall: 'fall var(--fall-duration) linear var(--fall-delay) infinite', // Sử dụng biến để tùy chỉnh
+        fall: 'fall var(--fall-duration) linear var(--fall-delay) infinite',
       },
     },
     safelist: [
-      "slick-active", // Đảm bảo Tailwind không lọc bỏ lớp này
+      "slick-active",
       "bg-blue-500",
       "bg-gray-300",
     ],

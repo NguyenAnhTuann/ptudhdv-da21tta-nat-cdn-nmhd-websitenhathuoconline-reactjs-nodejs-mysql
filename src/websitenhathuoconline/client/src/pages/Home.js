@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Slider from "react-slick";
-import CountdownTimer from "./CountdownTimer";
 
 
 const Home = () => {
@@ -10,9 +9,23 @@ const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);  // Trang hiện tại
+  const [productsPerPage] = useState(18);  // Số lượng sản phẩm trên mỗi trang
+
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
 
 
   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
     const fetchProducts = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/products");
@@ -42,15 +55,15 @@ const Home = () => {
   }, [location.search, products]);
 
   const settings = {
-    dots: true, // Hiển thị chấm tròn
-    infinite: true, // Tự lặp lại
-    speed: 500, // Tốc độ chuyển slide
+    dots: true,
+    infinite: true,
+    speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
-    autoplay: true, // Tự động chạy
-    autoplaySpeed: 3000, // Thời gian tự động chuyển (ms)
-    nextArrow: <SampleNextArrow />, // Nút chuyển tiếp
-    prevArrow: <SamplePrevArrow />, // Nút quay lại
+    autoplay: true,
+    autoplaySpeed: 3000,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
     appendDots: (dots) => (
       <div
         style={{
@@ -176,8 +189,8 @@ const Home = () => {
       name: product.name,
       price: product.price,
       quantity: 1,
-      unit: product.unit || "sản phẩm", // Nếu không có unit, đặt mặc định
-      image: JSON.parse(product.images)[0], // Lấy ảnh đầu tiên
+      unit: product.unit || "sản phẩm",
+      image: JSON.parse(product.images)[0],
     };
 
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -193,11 +206,15 @@ const Home = () => {
     alert("Đã thêm sản phẩm vào giỏ hàng!");
   };
 
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.ceil(filteredProducts.length / productsPerPage); i++) {
+    pageNumbers.push(i);
+  }
 
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
       {/* Slider bên trái và ảnh bên phải */}
-      <div className="bg-gray-100 py-8">
+      <div className="bg-gray-100">
         <div className="container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Slider bên trái */}
           <div className="col-span-2 relative">
@@ -311,38 +328,20 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Banner flashsale */}
+      <div className="container mx-auto">
+        <div className="w-full mt-14">
+          <img
+            src="https://cdn.nhathuoclongchau.com.vn/unsafe/1280x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Flashsale_Banner_HP_Desk_1216x190_HP_8b205e2047.png"
+            alt="Banner chính"
+            className="w-full h-auto rounded-2xl"
+          />
+        </div>
+      </div>
+
       {/* Phần Sản phẩm Sale */}
       <div className=" w-full py-8">
         <div className="container mx-auto">
-          {/* Flash Sale Header */}
-          <div
-            className="container mx-auto"
-            style={{
-              overflow: "hidden",
-              borderRadius: "0px",
-            }}
-          >
-            <div
-              className="relative text-white p-6 flex flex-col items-center justify-center"
-              style={{
-                backgroundImage: "url('https://cdn.nhathuoclongchau.com.vn/unsafe/1280x0/filters:quality(90)/https://cms-prod.s3-sgn09.fptcloud.com/Flashsale_Banner_HP_Desk_1216x190_HP_8b205e2047.png')",
-                backgroundSize: "contain",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                width: "100%",
-                height: "250px",
-              }}
-            >
-              <h2 className="text-blue-600">.</h2>
-              <h2 className="text-blue-600">.</h2>
-              <h2 className="text-blue-600">.</h2>
-              <h2 className="text-blue-600">.</h2>
-              <h2 className="text-blue-600">.</h2>
-              <CountdownTimer endTime={new Date().setHours(14, 0, 0)} />
-            </div>
-          </div>
-
-
           {/* Flash Sale Products */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 mt-6">
             {saleProducts.map((product) => (
@@ -439,7 +438,7 @@ const Home = () => {
 
           {/* Lưới sản phẩm */}
           <div className="grid grid-cols-6 gap-4 mt-8">
-            {filteredProducts.map((product) => (
+            {currentProducts.map((product) => (
               <div
                 key={product.id}
                 className="border rounded-3xl bg-white p-4 shadow-md hover:shadow-lg transition hover:border-blue-600"
@@ -451,7 +450,7 @@ const Home = () => {
                   <img
                     src={JSON.parse(product.images)[0]}
                     alt={product.name}
-                    className="w-full h-[200px] object-cover rounded"
+                    className="w-full h-full object-cover rounded"
                   />
                 </div>
 
@@ -469,25 +468,46 @@ const Home = () => {
                       currency: "VND",
                     }).format(product.price)}
                   </p>
-                  <p className="text-caption font-normal text-gray-6 line-through md:text-label2">
+                  <p className="text-caption font-normal text-gray-400 line-through md:text-label2">
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
                       currency: "VND",
                     }).format(product.oldPrice || product.price * 1.2)}
                   </p>
                   <p className="text-orange-500 text-xs mt-2">{product.soldInfo}</p>
+                  {/* Đã bán X/Y suất */}
+                  <div className="flex items-center mt-2 whitespace-nowrap">
+                    <div className="bg-orange-100 text-orange-600 text-xs px-3 py-1 rounded-full flex items-center">
+                      <span className="mr-1 text-orange-500">
+                        <i className="fas fa-fire"></i>
+                      </span>
+                      Đã bán hơn 1000 sản phẩm
+                    </div>
+                  </div>
                   <button
                     className="bg-blue-500 text-white text-sm px-4 py-2 rounded-3xl mt-4 w-full font-medium hover:bg-blue-600 transition"
                     onClick={() => handleAddToCart(product)}
                   >
                     Chọn mua
                   </button>
-
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        <div className="flex justify-center mt-6">
+          {pageNumbers.map((number) => (
+            <button
+              key={number}
+              onClick={() => paginate(number)}
+              className={`mx-1 px-4 py-2 rounded-full ${currentPage === number ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}
+            >
+              {number}
+            </button>
+          ))}
+        </div>
+
         {/* Phần Banner */}
         <div className="container mx-auto">
           {/* Banner chính */}

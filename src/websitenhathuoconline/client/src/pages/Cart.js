@@ -35,13 +35,13 @@ const Cart = () => {
   const handleRemove = (index) => {
     const updatedCart = cart.filter((_, i) => i !== index);
     setCart(updatedCart);
-    setCheckedItems(checkedItems.filter((_, i) => i !== index)); // Xóa trạng thái checkbox
+    setCheckedItems(checkedItems.filter((_, i) => i !== index));
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   const handleCheckboxChange = (index) => {
     const updatedCheckedItems = [...checkedItems];
-    updatedCheckedItems[index] = !updatedCheckedItems[index]; // Đảo ngược trạng thái
+    updatedCheckedItems[index] = !updatedCheckedItems[index];
     setCheckedItems(updatedCheckedItems);
   };
 
@@ -62,7 +62,7 @@ const Cart = () => {
   const isAllSelected = checkedItems.every((item) => item === true);
 
   const handlePurchase = async () => {
-    const userId = 1; // ID người dùng (giả định)
+    const userId = 1;
     const products = cart
       .filter((_, index) => checkedItems[index])
       .map((item) => {
@@ -71,16 +71,15 @@ const Cart = () => {
           return null;
         }
         return {
-          product_id: item.id, // Đảm bảo gửi đúng `product_id`
+          product_id: item.id,
           quantity: item.quantity,
           price: item.price,
         };
       })
-      .filter((product) => product !== null); // Chỉ giữ sản phẩm hợp lệ
+      .filter((product) => product !== null);
 
     const status = "Chưa nhận hàng";
 
-    // Kiểm tra nếu không có sản phẩm nào được chọn
     if (products.length === 0) {
       alert("Vui lòng chọn ít nhất một sản phẩm để đặt hàng.");
       return;
@@ -116,12 +115,31 @@ const Cart = () => {
             onClick={() => window.location.href = "/"}
             className="flex items-center text-blue-600 hover:underline"
           >
-            <span className="mr-2 text-xl">⭠ Tiếp tục mua sắm</span>
+            <span className="text-lg font-medium">⭠ Tiếp tục mua sắm</span>
           </button>
         </div>
 
         {cart.length === 0 ? (
-          <p>Giỏ hàng trống.</p>
+          <div className="text-center my-8">
+            <img
+              src="https://nhathuoclongchau.com.vn/estore-images/cart/illustration-cart-empty.png"
+              alt="Giỏ hàng trống"
+              className="w-[300px] h-[200px] mx-auto mb-4"
+            />
+            <p className="umd:text-label1 omd:text-heading3 font-semibold text-text-secondary">
+              Chưa có sản phẩm nào trong giỏ
+            </p>
+            <p className="mt-1 umd:text-label2 omd:text-label1 font-normal text-text-tertiary">
+              Cùng khám phá hàng ngàn sản phẩm tại Nhà thuốc NGUYEN ANH TUAN nhé!
+            </p>
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="bg-blue-600 font-semibold text-white py-4 px-8 rounded-3xl shadow-md hover:bg-blue-700 transition mt-4"
+            >
+              Khám phá ngay
+            </button>
+          </div>
+
         ) : (
           <div className="flex gap-6">
 
